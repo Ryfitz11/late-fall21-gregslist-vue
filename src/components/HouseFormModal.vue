@@ -1,39 +1,54 @@
 <template>
-  <Modal id="car-modal">
+  <Modal id="house-modal">
     <template #modal-title class="bg-success">
-      <h4>{{ car.id ? "Edit" : "Create" }} Car</h4>
+      <h4>{{ house.id ? "Edit" : "Create" }} House</h4>
     </template>
     <template #modal-body>
       <form @submit.prevent="handleSubmit">
         <div class="mb-3 d-flex justify-content-between">
           <div>
-            <label for="make" class="form-label">Make</label>
+            <label for="bedrooms" class="form-label">Bedrooms</label>
             <input
-              type="text"
+              type="number"
               class="form-control"
-              name="make"
-              id="make"
-              aria-describedby="make"
-              placeholder="Make..."
+              name="bedrooms"
+              id="bedrooms"
+              aria-describedby="bedrooms"
+              placeholder="Bedrooms..."
+              min="1"
+              max="99"
               required
-              v-model="editable.make"
+              v-model="editable.bedrooms"
             />
           </div>
           <div>
-            <label for="model" class="form-label">Model</label>
+            <label for="bathrooms" class="form-label">Bathrooms</label>
             <input
-              type="text"
+              type="number"
               class="form-control"
-              name="model"
-              id="model"
-              aria-describedby="model"
-              placeholder="Model..."
+              name="bathrooms"
+              id="bathrooms"
+              aria-describedby="bathrooms"
+              placeholder="Bathrooms..."
+              min="1"
+              max="99"
               required
-              v-model="editable.model"
+              v-model="editable.bathrooms"
             />
           </div>
-        </div>
-        <div class="mb-3 d-flex justify-content-between">
+          <div>
+            <label for="levels" class="form-label">Floors</label>
+            <input
+              type="number"
+              v-model="editable.levels"
+              class="form-control"
+              name="levels"
+              id="levels"
+              aria-describedby="levels"
+              placeholder="Bathrooms..."
+              default="1"
+            />
+          </div>
           <div>
             <label for="year" class="form-label">Year</label>
             <input
@@ -43,24 +58,13 @@
               id="year"
               aria-describedby="year"
               placeholder="Year..."
-              min="1950"
+              min="1250"
               max="2022"
               required
               v-model="editable.year"
             />
           </div>
-          <div>
-            <label for="color" class="form-label">Color</label>
-            <input
-              type="color"
-              v-model="editable.color"
-              class="form-control"
-              name="color"
-              id="color"
-              aria-describedby="color"
-              required
-            />
-          </div>
+
           <div>
             <label for="price" class="form-label">Price</label>
             <input
@@ -117,7 +121,7 @@
             Close
           </button>
           <button type="submit" class="btn btn-primary">
-            {{ car.id ? "Save" : "Create" }}
+            {{ house.id ? "Save" : "Create" }}
           </button>
         </div>
       </form>
@@ -129,19 +133,19 @@
 <script>
 import { ref } from "@vue/reactivity";
 import { logger } from "../utils/Logger";
-import { carsService } from "../services/CarsService";
+import { houseService } from "../services/HouseService";
 import Pop from "../utils/Pop";
 import { Modal } from "bootstrap";
 import { useRouter } from "vue-router";
 import { AppState } from "../AppState";
-import { Car } from "../Models/Car";
+import { House } from "../Models/House";
 import { watchEffect } from "@vue/runtime-core";
 
 export default {
   props: {
-    car: {
-      type: Car,
-      default: () => new Car(),
+    house: {
+      type: House,
+      default: () => new House(),
     },
   },
   setup(props) {
@@ -150,7 +154,7 @@ export default {
 
     // watchEffect is a method that runs anytime any of its values change
     watchEffect(() => {
-      editable.value = { ...props.car };
+      editable.value = { ...props.house };
     });
 
     return {
@@ -158,19 +162,19 @@ export default {
       async handleSubmit() {
         try {
           if (editable.value.id) {
-            await carsService.edit(editable.value);
+            await houseService.edit(editable.value);
           } else {
-            await carsService.create(editable.value);
+            await houseService.create(editable.value);
           }
           // if successful close modal
           Modal.getOrCreateInstance(
-            document.getElementById("car-modal")
+            document.getElementById("house-modal")
           ).hide();
           router.push({
-            name: "CarDetails",
-            params: { id: AppState.activeCar.id },
+            name: "HouseDetails",
+            params: { id: AppState.activeHouse.id },
           });
-          // change route to car details for this new car
+          // change route to house details for this new house
         } catch (error) {
           logger.error(error);
           Pop.toast("Failed to Create", "error");
